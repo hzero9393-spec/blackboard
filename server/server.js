@@ -7,6 +7,7 @@ const projectRoutes = require('./routes/projects');
 
 const app = express();
 const port = process.env.PORT || 4000;
+let dbReadyPromise = null;
 
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
@@ -17,8 +18,17 @@ app.use('/api/projects', projectRoutes);
 // Placeholder for future real-time collaboration with Socket.IO broadcast.
 // Placeholder for future AI layout generation service integration.
 
-initDb().then(() => {
-  app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+async function ensureDb() {
+  if (!dbReadyPromise) dbReadyPromise = initDb();
+  await dbReadyPromise;
+}
+
+if (process.env.VERCEL !== '1') {
+  ensureDb().then(() => {
+    app.listen(port, () => {
+      console.log(`Server running on http://localhost:${port}`);
+    });
   });
-});
+}
+
+module.exports = { app, ensureDb };

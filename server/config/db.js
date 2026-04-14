@@ -1,7 +1,8 @@
 const { createClient } = require('@libsql/client');
 
 const client = createClient({
-  url: process.env.TURSO_DATABASE_URL || 'file:local.db',
+  // Vercel serverless cannot rely on project root file writes; /tmp is the safe fallback.
+  url: process.env.TURSO_DATABASE_URL || 'file:/tmp/local.db',
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
